@@ -22,14 +22,10 @@ class Game:
 			for j in range(0,n):
 				row.append('.')
 			tempMatrix.append(row)
-
 		for block in b:
 			tempMatrix[block[0]][block[1]] = '*'
-			
 		self.current_state = tempMatrix
 
-		self.draw_board() # TO DELETE
-		
 		# Player X always plays first
 		self.player_turn = 'X'
 
@@ -42,13 +38,14 @@ class Game:
 		print()
 		
 	def is_valid(self, px, py):
-		if px < 0 or px > 2 or py < 0 or py > 2:
+		if px < 0 or px > len(self.current_state) or py < 0 or py > len(self.current_state):
 			return False
 		elif self.current_state[px][py] != '.':
 			return False
 		else:
 			return True
 
+	# TODO
 	def is_end(self):
 		# Vertical win
 		for i in range(0, 3):
@@ -81,6 +78,7 @@ class Game:
 		# It's a tie!
 		return '.'
 
+	# TODO
 	def check_end(self):
 		self.result = self.is_end()
 		# Printing the appropriate message if the game has ended
@@ -104,6 +102,7 @@ class Game:
 			else:
 				print('The move is not valid! Try again.')
 
+	# TODO
 	def switch_player(self):
 		if self.player_turn == 'X':
 			self.player_turn = 'O'
@@ -111,6 +110,7 @@ class Game:
 			self.player_turn = 'X'
 		return self.player_turn
 
+	# TODO
 	def play(self,algo=None,player_x=None,player_o=None):		
 		if algo == None:
 			algo = self.ALPHABETA
@@ -123,25 +123,25 @@ class Game:
 			if self.check_end():
 				return
 			start = time.time()
-			if algo == self.MINIMAX:
-				if self.player_turn == 'X':
-					(_, x, y) = self.minimax(max=False)
-				else:
-					(_, x, y) = self.minimax(max=True)
-			else: # algo == self.ALPHABETA
-				if self.player_turn == 'X':
-					(m, x, y) = self.alphabeta(max=False)
-				else:
-					(m, x, y) = self.alphabeta(max=True)
+			# if algo == self.MINIMAX:
+			# 	if self.player_turn == 'X':
+			# 		(_, x, y) = self.minimax(max=False)
+			# 	else:
+			# 		(_, x, y) = self.minimax(max=True)
+			# else: # algo == self.ALPHABETA
+			# 	if self.player_turn == 'X':
+			# 		(m, x, y) = self.alphabeta(max=False)
+			# 	else:
+			# 		(m, x, y) = self.alphabeta(max=True)
 			end = time.time()
 			if (self.player_turn == 'X' and player_x == self.HUMAN) or (self.player_turn == 'O' and player_o == self.HUMAN):
 					if self.recommend:
 						print(F'Evaluation time: {round(end - start, 7)}s')
-						print(F'Recommended move: x = {x}, y = {y}')
+						# print(F'Recommended move: x = {x}, y = {y}')
 					(x,y) = self.input_move()
 			if (self.player_turn == 'X' and player_x == self.AI) or (self.player_turn == 'O' and player_o == self.AI):
 						print(F'Evaluation time: {round(end - start, 7)}s')
-						print(F'Player {self.player_turn} under AI control plays: x = {x}, y = {y}')
+						# print(F'Player {self.player_turn} under AI control plays: x = {x}, y = {y}')
 			self.current_state[x][y] = self.player_turn
 			self.switch_player()
 
@@ -150,7 +150,7 @@ def main():
 	b = [(0,3), (1,1), (2,0), (2,3), (3,1), (4,2), (1,0)]
 	g = Game(n, b, recommend = True)
 	# g.play(algo=Game.ALPHABETA,player_x=Game.AI,player_o=Game.AI)
-	# g.play(algo=Game.MINIMAX,player_x=Game.AI,player_o=Game.HUMAN)
+	g.play(algo=Game.MINIMAX,player_x=Game.HUMAN,player_o=Game.HUMAN)
 
 if __name__ == "__main__":
 	main()
