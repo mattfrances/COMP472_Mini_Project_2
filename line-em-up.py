@@ -10,10 +10,14 @@ class Game:
 	Params
 	n: size of the board
 	b: array of indices of integer tuples for blocks
+	s: consecutive pieces required to win the game
 	"""
-	def __init__(self, n, b, recommend = True):
+	def __init__(self, n, b, s, recommend = True):
 		self.initialize_game(n, b)
 		self.recommend = recommend
+		self.n = n
+		self.s = s
+		self.b = b
 
 	def initialize_game(self,n,b):
 		tempMatrix = []
@@ -38,47 +42,78 @@ class Game:
 		print()
 		
 	def is_valid(self, px, py):
-		if px < 0 or px > len(self.current_state) or py < 0 or py > len(self.current_state):
+		if px < 0 or px > len(self.current_state) - 1 or py < 0 or py > len(self.current_state) - 1:
 			return False
 		elif self.current_state[px][py] != '.':
 			return False
 		else:
 			return True
 
-	# TODO
+	# TODO - improve algorithm to calculate longest sequence in a given array
+	def has_s_consecutive_values(self, arr):
+		largest_count = 0
+		largest_count_char = ''
+
+		for i in range(len(arr) - self.s + 1):
+			if arr[i] != 'X' and arr[i] != 'O':
+				continue
+			sub_array = arr[i:i+self.s]
+			current_char = sub_array[0]
+			count = 1
+			for j in range(1, len(sub_array)):
+				if sub_array[j] == current_char:
+					count += 1
+				else:
+					if count > largest_count:
+						largest_count = count
+						largest_count_char = current_char
+						break
+			if count > largest_count:
+				largest_count = count
+				largest_count_char = current_char
+						
+		if largest_count >= self.s:
+			return largest_count_char
+		else:
+			return None
+
 	def is_end(self):
-		# Vertical win
-		for i in range(0, 3):
-			if (self.current_state[0][i] != '.' and
-				self.current_state[0][i] == self.current_state[1][i] and
-				self.current_state[1][i] == self.current_state[2][i]):
-				return self.current_state[0][i]
-		# Horizontal win
-		for i in range(0, 3):
-			if (self.current_state[i] == ['X', 'X', 'X']):
-				return 'X'
-			elif (self.current_state[i] == ['O', 'O', 'O']):
-				return 'O'
+		# Vertical win - check all verticals
+		for row in self.current_state:
+			winner = self.has_s_consecutive_values(row)
+			if winner:
+				return winner
+		# Horizontal win - check all horizontals
+		for y in range(0, len(self.current_state)):
+			horizontal_arr = []
+			for x in range(len(self.current_state)):
+				horizontal_arr.append(self.current_state[x][y])
+			winner = self.has_s_consecutive_values(horizontal_arr)
+			if winner:
+				return winner
 		# Main diagonal win
-		if (self.current_state[0][0] != '.' and
-			self.current_state[0][0] == self.current_state[1][1] and
-			self.current_state[0][0] == self.current_state[2][2]):
-			return self.current_state[0][0]
+		diagonal_arr = []
+		for i in range(len(self.current_state)):
+			diagonal_arr.append(self.current_state[i][i])
+		winner = self.has_s_consecutive_values(diagonal_arr)
+		if winner:
+			return winner
 		# Second diagonal win
-		if (self.current_state[0][2] != '.' and
-			self.current_state[0][2] == self.current_state[1][1] and
-			self.current_state[0][2] == self.current_state[2][0]):
-			return self.current_state[0][2]
+		second_diagonal_arr = []
+		for i in range(len(self.current_state)):
+			idx = len(self.current_state) - 1 - i
+			second_diagonal_arr.append(self.current_state[i][idx])
+		winner = self.has_s_consecutive_values(second_diagonal_arr)
+		if winner:
+			return winner
 		# Is whole board full?
-		for i in range(0, 3):
-			for j in range(0, 3):
-				# There's an empty field, we continue the game
-				if (self.current_state[i][j] == '.'):
+		for row in self.current_state:
+			for item in row:
+				if (item == '.'):
 					return None
 		# It's a tie!
 		return '.'
 
-	# TODO
 	def check_end(self):
 		self.result = self.is_end()
 		# Printing the appropriate message if the game has ended
@@ -89,7 +124,7 @@ class Game:
 				print('The winner is O!')
 			elif self.result == '.':
 				print("It's a tie!")
-			self.initialize_game()
+			self.initialize_game(self.n, self.b)
 		return self.result
 
 	def input_move(self):
@@ -102,7 +137,6 @@ class Game:
 			else:
 				print('The move is not valid! Try again.')
 
-	# TODO
 	def switch_player(self):
 		if self.player_turn == 'X':
 			self.player_turn = 'O'
@@ -135,20 +169,21 @@ class Game:
 			# 		(m, x, y) = self.alphabeta(max=True)
 			end = time.time()
 			if (self.player_turn == 'X' and player_x == self.HUMAN) or (self.player_turn == 'O' and player_o == self.HUMAN):
-					if self.recommend:
-						print(F'Evaluation time: {round(end - start, 7)}s')
+					# if self.recommend:
+					# 	print(F'Evaluation time: {round(end - start, 7)}s')
 						# print(F'Recommended move: x = {x}, y = {y}')
 					(x,y) = self.input_move()
-			if (self.player_turn == 'X' and player_x == self.AI) or (self.player_turn == 'O' and player_o == self.AI):
-						print(F'Evaluation time: {round(end - start, 7)}s')
+			# if (self.player_turn == 'X' and player_x == self.AI) or (self.player_turn == 'O' and player_o == self.AI):
+						# print(F'Evaluation time: {round(end - start, 7)}s')
 						# print(F'Player {self.player_turn} under AI control plays: x = {x}, y = {y}')
 			self.current_state[x][y] = self.player_turn
 			self.switch_player()
 
 def main():
-	n = 5
-	b = [(0,3), (1,1), (2,0), (2,3), (3,1), (4,2), (1,0)]
-	g = Game(n, b, recommend = True)
+	n = int(input('Enter size of board: '))
+	s = int(input('Enter the number of consecutive pieces required to win: '))
+	b = [(0,0), (1,0)]
+	g = Game(n, b, s, recommend = True)
 	# g.play(algo=Game.ALPHABETA,player_x=Game.AI,player_o=Game.AI)
 	g.play(algo=Game.MINIMAX,player_x=Game.HUMAN,player_o=Game.HUMAN)
 
