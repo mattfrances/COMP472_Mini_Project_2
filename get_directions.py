@@ -1,21 +1,13 @@
-current_state = [
-  ['X', '*', 'O', 'X', 'O'],
-  ['X', 'O', 'X', 'O', 'X'],
-  ['O', '*', 'X', 'O', 'X'],
-  ['O', 'O', '*', 'O', 'X'],
-  ['.', 'X', 'X', 'X', 'O']
-]
-
-def get_verticals():
+def get_verticals(current_state):
   all_verticals = []
   for i in range(len(current_state)):
     all_verticals.append([row[i] for row in current_state])
   return all_verticals
 
-def get_horizontals():
+def get_horizontals(current_state):
   return [row for row in current_state]
 
-def get_diagonals():
+def get_diagonals(current_state):
   all_diagonals = []
   for k in range(len(current_state)*2 - 1):
     print('k: ', k)
@@ -28,10 +20,9 @@ def get_diagonals():
       if i < len(current_state) and j < len(current_state):
         current_diagonal.append(current_state[i][j])
     all_diagonals.append(current_diagonal)
-    print('\n\n\n\n\n')
   return all_diagonals
 
-def get_secondary_diagonals():
+def get_secondary_diagonals(current_state):
   all_diagonals = []
   for k in range(len(current_state)*2 - 1):
     current_diagonal = []
@@ -41,6 +32,3 @@ def get_secondary_diagonals():
         current_diagonal.append(current_state[j][i])
     all_diagonals.append(current_diagonal)
   return all_diagonals
-
-
-print(get_secondary_diagonals())

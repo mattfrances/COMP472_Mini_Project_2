@@ -1,4 +1,5 @@
 import time
+from get_directions import get_diagonals, get_directions, get_horizontals, get_secondary_diagonals, get_verticals
 
 class Game:
 	MINIMAX = 0
@@ -179,6 +180,35 @@ class Game:
 			self.current_state[x][y] = self.player_turn
 			self.switch_player()
 
+	['X', '*', 'O', 'X', 'O']
+
+	def heuristic_e2(self, current_state):
+		vertical = get_directions.get_verticals()
+		horizontal = get_directions.get_horizontals()
+		diagonal = get_directions.get_diagonals()
+		secondary_diagonal = get_directions.get_secondary_diagonals()
+		rows = [*vertical, *horizontal, *diagonal, *secondary_diagonal]
+		goal_rows_X=0
+		goal_rows_Y=0
+
+		for row in rows:
+			for i in range(len(row)):
+				if i+self.s >= len(row): # if index of current position in the row + length of consecutive characters needed for a row to be considered open for a win. is greater than or equal to the length of the row, there is no open row for a win.
+					break
+				for j in range(i,i+self.s+1): # from given position in the row, is there an open row for a win.
+					if row[j]=='X':
+						if row[j]=='Y' or row[j]=='*': 
+							break
+						else if i==i+self.s: # if can succesfully iterate over entire row subset, a goal row has been found.
+							goal_rows_X+=1
+					else:
+						if row[j]=='X' or row[j]=='*': 
+							break
+						elif i==i+self.s: # if can succesfully iterate over entire row subset, a goal row has been found.
+							goal_rows_Y+=1
+		score = goal_rows_X-goal_rows_y
+		return score
+
 def main():
 	n = int(input('Enter size of board: '))
 	s = int(input('Enter the number of consecutive pieces required to win: '))
@@ -189,4 +219,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-
