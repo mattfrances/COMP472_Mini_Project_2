@@ -1,7 +1,5 @@
 import time
-from get_directions import get_diagonals, get_horizontals, get_secondary_diagonals, get_verticals
 
-# TODO - make the minimax function "time aware"
 class Game:
 	MINIMAX = 0
 	ALPHABETA = 1
@@ -53,7 +51,7 @@ class Game:
 		else:
 			return True
 
-	# TODO - improve algorithm to calculate longest sequence in a given array
+	# TODO (maybe) - improve algorithm to calculate longest sequence in a given array
 	def has_s_consecutive_values(self, arr):
 		largest_count = 0
 		largest_count_char = ''
@@ -112,36 +110,31 @@ class Game:
 			all_diagonals.append(current_diagonal)
 		return all_diagonals
 
-	# TODO - fix this up l8er
 	def is_end(self):
-		# Vertical win - check all verticals
-		for row in self.current_state:
-			winner = self.has_s_consecutive_values(row)
+		# Vertical win
+		verticals = self.get_verticals()
+		for arr in verticals:
+			winner = self.has_s_consecutive_values(arr)
 			if winner:
 				return winner
-		# Horizontal win - check all horizontals
-		for y in range(0, len(self.current_state)):
-			horizontal_arr = []
-			for x in range(len(self.current_state)):
-				horizontal_arr.append(self.current_state[x][y])
-			winner = self.has_s_consecutive_values(horizontal_arr)
+		# Horizontal win
+		horizontals = self.get_horizontals()
+		for arr in horizontals:
+			winner = self.has_s_consecutive_values(arr)
 			if winner:
 				return winner
-		# Main diagonal win TODO - bug in code, will only find middle diagonal, not any diagonal
-		diagonal_arr = []
-		for i in range(len(self.current_state)):
-			diagonal_arr.append(self.current_state[i][i])
-		winner = self.has_s_consecutive_values(diagonal_arr)
-		if winner:
-			return winner
-		# Second diagonal win TODO - bug in code, will only find middle diagonal, not any diagonal
-		second_diagonal_arr = []
-		for i in range(len(self.current_state)):
-			idx = len(self.current_state) - 1 - i
-			second_diagonal_arr.append(self.current_state[i][idx])
-		winner = self.has_s_consecutive_values(second_diagonal_arr)
-		if winner:
-			return winner
+		# Diagonals win
+		diagonals = self.get_diagonals()
+		for arr in diagonals:
+			winner = self.has_s_consecutive_values(arr)
+			if winner:
+				return winner
+		# Second diagonals win
+		second_diagonals = self.get_secondary_diagonals()
+		for arr in second_diagonals:
+			winner = self.has_s_consecutive_values(arr)
+			if winner:
+				return winner
 		# Is whole board full?
 		for row in self.current_state:
 			for item in row:
