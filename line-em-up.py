@@ -81,7 +81,6 @@ class Game:
 		else:
 			return None
 
-	
 	def get_verticals(self):
 		all_verticals = []
 		for i in range(len(self.current_state)):
@@ -187,15 +186,12 @@ class Game:
 		diagonal = self.get_diagonals()
 		secondary_diagonal = self.get_secondary_diagonals()
 		all_rows = [*vertical, *horizontal, *diagonal, *secondary_diagonal]
-
 		score = 0
 		for row in all_rows:
 			num_x = row.count('X')
 			num_o = row.count('O')
-
 			score += num_x ** 2
 			score -= num_o ** 2
-
 		return score
 
 	def heuristic_e2(self):
