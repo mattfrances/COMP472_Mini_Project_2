@@ -12,13 +12,14 @@ class Game:
 	b: array of indices of integer tuples for blocks
 	s: consecutive pieces required to win the game
 	"""
-	def __init__(self, n, b, s, max_depth, max_time, recommend = True):
+	def __init__(self, n, b, s, d1, d2, max_time, recommend = True):
 		self.initialize_game(n, b)
 		self.recommend = recommend
 		self.n = n
 		self.s = s
 		self.b = b
-		self.max_depth = max_depth
+		self.d1 = d1
+		self.d2 = d2
 		self.max_time = max_time
 
 	def initialize_game(self,n,b):
@@ -231,7 +232,7 @@ class Game:
 
 		# If max depth reached, or we've reached a terminal node
 		# 	then run the heuristic and return the score	
-		if depth >= self.max_depth or self.is_end():
+		if (self.player_turn == 'X' and depth >= self.d1) or (self.player_turn == 'O' and depth >= self.d2) or self.is_end():
 			score = self.heuristic_e1() if simple_heuristic else self.heuristic_e2()
 			return (score, x, y)
 
@@ -309,9 +310,10 @@ def main():
 	n = int(input('Enter size of board: '))
 	blocks = create_blocks(n)
 	s = int(input('Enter the number of consecutive pieces required to win: '))
-	max_depth = int(input('Enter the maximum depth for the adversarial search: '))
+	max_depth_player_1 = int(input('Enter Player 1\'s maximum depth for the adversarial search: '))
+	max_depth_player_2 = int(input('Enter Player 2\'s maximum depth for the adversarial search: '))
 	max_time = int(input('Enter the maximum time (in seconds) permitted for the AI to return a move: '))
-	g = Game(n, blocks, s, max_depth, max_time, recommend = True)
+	g = Game(n, blocks, s, max_depth_player_1, max_depth_player_2, max_time, recommend = True)
 	g.play(algo=Game.MINIMAX,player_x=Game.AI,player_o=Game.AI)
 	# g.play(algo=Game.MINIMAX,player_x=Game.AI,player_o=Game.HUMAN)
 	# g.play(algo=Game.MINIMAX,player_x=Game.HUMAN,player_o=Game.HUMAN)
