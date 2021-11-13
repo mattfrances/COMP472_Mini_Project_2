@@ -5,7 +5,7 @@ class Game:
 	ALPHABETA = 1
 	HUMAN = 2
 	AI = 3
-	
+
 	"""
 	Params
 	n: size of the board
@@ -215,7 +215,7 @@ class Game:
 		score = goal_rows_X-goal_rows_Y
 		return score
 
-	def minimax(self, depth=0, max=False):
+	def minimax(self, depth=0, max=False, simple_heuristic=True):
 		# Minimizing for 'X' and maximizing for 'O'
 		# Possible values are:
 		# -1 - win for 'X'
@@ -232,8 +232,7 @@ class Game:
 		# If max depth reached, or we've reached a terminal node
 		# 	then run the heuristic and return the score	
 		if depth >= self.max_depth or self.is_end():
-			#run heuristic on self.current_state and return score
-			score = self.heuristic_e2()
+			score = self.heuristic_e1() if simple_heuristic else self.heuristic_e2()
 			return (score, x, y)
 
 		for i in range(0, len(self.current_state)):
@@ -241,14 +240,14 @@ class Game:
 				if self.current_state[i][j] == '.':
 					if max:
 						self.current_state[i][j] = 'O'
-						(v, _, _) = self.minimax(depth = depth + 1, max=False)
+						(v, _, _) = self.minimax(depth = depth + 1, max=False, simple_heuristic=False)
 						if v > value:
 							value = v
 							x = i
 							y = j
 					else:
 						self.current_state[i][j] = 'X'
-						(v, _, _) = self.minimax(depth = depth + 1, max=True)
+						(v, _, _) = self.minimax(depth = depth + 1, max=True, simple_heuristic=True)
 						if v < value:
 							value = v
 							x = i
