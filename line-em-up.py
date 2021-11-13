@@ -1,4 +1,5 @@
 import time
+from get_directions import get_diagonals, get_horizontals, get_secondary_diagonals, get_verticals
 
 # TODO - make the minimax function "time aware"
 class Game:
@@ -197,6 +198,34 @@ class Game:
 
 		return score
 
+	def heuristic_e2(self):
+		vertical = self.get_verticals()
+		horizontal = self.get_horizontals()
+		diagonal = self.get_diagonals()
+		secondary_diagonal = self.get_secondary_diagonals()
+		all_rows = [*vertical, *horizontal, *diagonal, *secondary_diagonal]
+		goal_rows_X=0
+		goal_rows_Y=0
+
+		for row in all_rows:
+			for i in range(len(row)):
+				if i+self.s >= len(row): # if index of current position in the row + length of consecutive characters needed for a row to be considered open for a win. is greater than or equal to the length of the row, there is no open row for a win.
+					break
+				for j in range(i,i+self.s+1): # from given position in the row, is there an open row for a win.
+					if row[j]=='X':
+						if row[j]=='Y' or row[j]=='*': 
+							break
+						elif i==i+self.s: # if can succesfully iterate over entire row subset, a goal row has been found.
+							goal_rows_X+=1
+					else:
+						if row[j]=='X' or row[j]=='*': 
+							break
+						elif i==i+self.s: # if can succesfully iterate over entire row subset, a goal row has been found.
+							goal_rows_Y+=1
+
+		score = goal_rows_X-goal_rows_Y
+		return score
+
 	def minimax(self, depth=0, max=False):
 		# Minimizing for 'X' and maximizing for 'O'
 		# Possible values are:
@@ -215,7 +244,7 @@ class Game:
 		# 	then run the heuristic and return the score	
 		if depth >= self.max_depth or self.is_end():
 			#run heuristic on self.current_state and return score
-			score = self.heuristic_e1()
+			score = self.heuristic_e2()
 			return (score, x, y)
 
 		for i in range(0, len(self.current_state)):
@@ -301,4 +330,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-
