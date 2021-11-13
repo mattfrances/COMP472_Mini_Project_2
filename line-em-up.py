@@ -301,8 +301,6 @@ class Game:
 			self.current_state[x][y] = self.player_turn
 			self.switch_player()
 
-	['X', '*', 'O', 'X', 'O']
-
 def create_blocks(board_size):
 	num_b = int(input('Enter the number of blocks: '))
 	blocks = []
