@@ -222,7 +222,7 @@ class Game:
 		# -1 - win for 'X'
 		# 0  - a tie
 		# 1  - loss for 'X'
-		# We're initially setting it to 2 or -2 as worse than the worst case:
+		# We're initially setting it to inf or -inf as worse than the worst case:
 
 		value = float('inf')
 		if max:
@@ -256,6 +256,60 @@ class Game:
 					self.current_state[i][j] = '.'
 		return (value, x, y)
 
+
+
+	def alphabeta(self, depth=0, alpha=float('-inf'), beta=float('inf'), max=False):
+		# Minimizing for 'X' and maximizing for 'O'
+		# Possible values are:
+		# -1 - win for 'X'
+		# 0  - a tie
+		# 1  - loss for 'X'
+		# We're initially setting it to inf or -inf as worse than the worst case:
+		value = float('inf')
+		if max:
+			value = float('-inf')
+		x = None
+		y = None
+
+		# If max depth reached, or we've reached a terminal node
+		# 	then run the heuristic and return the score	
+		if (self.player_turn == 'X' and depth >= self.d1) or (self.player_turn == 'O' and depth >= self.d2) or self.is_end():
+			score = self.heuristic_e1() if simple_heuristic else self.heuristic_e2()
+			return (score, x, y)
+
+		for i in range(0, len(self.current_state)):
+			for j in range(0, len(self.current_state)):
+				if self.current_state[i][j] == '.':
+					if max:
+						self.current_state[i][j] = 'O'
+						(v, _, _) = self.minimax(depth = depth + 1, max=False, simple_heuristic=False)
+						if v > value:
+							value = v
+							x = i
+							y = j
+					else:
+						self.current_state[i][j] = 'X'
+						(v, _, _) = self.minimax(depth = depth + 1, max=True, simple_heuristic=True)
+						if v < value:
+							value = v
+							x = i
+							y = j
+					self.current_state[i][j] = '.'
+
+					if max: 
+						if value >= beta:
+							return (value, x, y)
+						if value > alpha:
+							alpha = value
+					else:
+						if value <= alpha:
+							return (value, x, y)
+						if value < beta:
+							beta = value
+		return (value, x, y)
+
+
+
 	def play(self,algo=None,player_x=None,player_o=None):		
 		if algo == None:
 			algo = self.ALPHABETA
@@ -273,11 +327,11 @@ class Game:
 					(_, x, y) = self.minimax(max=False)
 				else:
 					(_, x, y) = self.minimax(max=True)
-			# else: # algo == self.ALPHABETA
-			# 	if self.player_turn == 'X':
-			# 		(m, x, y) = self.alphabeta(max=False)
-			# 	else:
-			# 		(m, x, y) = self.alphabeta(max=True)
+			else: # algo == self.ALPHABETA
+				if self.player_turn == 'X':
+					(m, x, y) = self.alphabeta(max=False)
+				else:
+					(m, x, y) = self.alphabeta(max=True)
 			end = time.time()
 			if (self.player_turn == 'X' and player_x == self.HUMAN) or (self.player_turn == 'O' and player_o == self.HUMAN):
 					if self.recommend:
@@ -314,9 +368,16 @@ def main():
 	max_depth_player_2 = int(input('Enter Player 2\'s maximum depth for the adversarial search: '))
 	max_time = int(input('Enter the maximum time (in seconds) permitted for the AI to return a move: '))
 	g = Game(n, blocks, s, max_depth_player_1, max_depth_player_2, max_time, recommend = True)
-	g.play(algo=Game.MINIMAX,player_x=Game.AI,player_o=Game.AI)
+	
+	# g.play(algo=Game.MINIMAX,player_x=Game.AI,player_o=Game.AI)
 	# g.play(algo=Game.MINIMAX,player_x=Game.AI,player_o=Game.HUMAN)
+	# g.play(algo=Game.MINIMAX,player_x=Game.HUMAN,player_o=Game.AI)
 	# g.play(algo=Game.MINIMAX,player_x=Game.HUMAN,player_o=Game.HUMAN)
+
+	g.play(algo=Game.ALPHABETA,player_x=Game.AI,player_o=Game.AI)
+	# g.play(algo=Game.ALPHABETA,player_x=Game.AI,player_o=Game.HUMAN)
+	# g.play(algo=Game.ALPHABETA,player_x=Game.HUMAN,player_o=Game.AI)
+	# g.play(algo=Game.ALPHABETA,player_x=Game.HUMAN,player_o=Game.HUMAN)
 
 if __name__ == "__main__":
 	main()
