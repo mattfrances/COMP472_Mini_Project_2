@@ -258,7 +258,7 @@ class Game:
 
 
 
-	def alphabeta(self, depth=0, alpha=float('-inf'), beta=float('inf'), max=False):
+	def alphabeta(self, depth=0, alpha=float('-inf'), beta=float('inf'), max=False, simple_heuristic=True):
 		# Minimizing for 'X' and maximizing for 'O'
 		# Possible values are:
 		# -1 - win for 'X'
