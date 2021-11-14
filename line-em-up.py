@@ -282,14 +282,14 @@ class Game:
 				if self.current_state[i][j] == '.':
 					if max:
 						self.current_state[i][j] = 'O'
-						(v, _, _) = self.minimax(depth = depth + 1, max=False, simple_heuristic=False)
+						(v, _, _) = self.alphabeta(depth = depth + 1, max=False, simple_heuristic=False)
 						if v > value:
 							value = v
 							x = i
 							y = j
 					else:
 						self.current_state[i][j] = 'X'
-						(v, _, _) = self.minimax(depth = depth + 1, max=True, simple_heuristic=True)
+						(v, _, _) = self.alphabeta(depth = depth + 1, max=True, simple_heuristic=True)
 						if v < value:
 							value = v
 							x = i
