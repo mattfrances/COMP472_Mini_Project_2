@@ -21,6 +21,7 @@ class Game:
 		self.d1 = d1
 		self.d2 = d2
 		self.max_time = max_time
+		self.buffer_time = 0.005
 
 	def initialize_game(self,n,b):
 		tempMatrix = []
@@ -216,7 +217,7 @@ class Game:
 		score = goal_rows_X-goal_rows_Y
 		return score
 
-	def minimax(self, depth=0, max=False, simple_heuristic=True):
+	def minimax(self, start_time, depth=0, max=False, simple_heuristic=True):
 		# Minimizing for 'X' and maximizing for 'O'
 		# Possible values are:
 		# -1 - win for 'X'
@@ -230,9 +231,10 @@ class Game:
 		x = None
 		y = None
 
-		# If max depth reached, or we've reached a terminal node
+		# If max depth or time is reached, or we've reached a terminal node
 		# 	then run the heuristic and return the score	
-		if (self.player_turn == 'X' and depth >= self.d1) or (self.player_turn == 'O' and depth >= self.d2) or self.is_end():
+		time_spent = (time.time() - start_time) + self.buffer_time
+		if (time_spent >= self.max_time) or (self.player_turn == 'X' and depth >= self.d1) or (self.player_turn == 'O' and depth >= self.d2) or self.is_end():
 			score = self.heuristic_e1() if simple_heuristic else self.heuristic_e2()
 			return (score, x, y)
 
@@ -241,14 +243,14 @@ class Game:
 				if self.current_state[i][j] == '.':
 					if max:
 						self.current_state[i][j] = 'O'
-						(v, _, _) = self.minimax(depth = depth + 1, max=False, simple_heuristic=False)
+						(v, _, _) = self.minimax(start_time, depth = depth + 1, max=False, simple_heuristic=False)
 						if v > value:
 							value = v
 							x = i
 							y = j
 					else:
 						self.current_state[i][j] = 'X'
-						(v, _, _) = self.minimax(depth = depth + 1, max=True, simple_heuristic=True)
+						(v, _, _) = self.minimax(start_time, depth = depth + 1, max=True, simple_heuristic=True)
 						if v < value:
 							value = v
 							x = i
@@ -258,7 +260,7 @@ class Game:
 
 
 
-	def alphabeta(self, depth=0, alpha=float('-inf'), beta=float('inf'), max=False, simple_heuristic=True):
+	def alphabeta(self, start_time, depth=0, alpha=float('-inf'), beta=float('inf'), max=False, simple_heuristic=True):
 		# Minimizing for 'X' and maximizing for 'O'
 		# Possible values are:
 		# -1 - win for 'X'
@@ -271,9 +273,10 @@ class Game:
 		x = None
 		y = None
 
-		# If max depth reached, or we've reached a terminal node
+		# If max depth or time is reached, or we've reached a terminal node
 		# 	then run the heuristic and return the score	
-		if (self.player_turn == 'X' and depth >= self.d1) or (self.player_turn == 'O' and depth >= self.d2) or self.is_end():
+		time_spent = (time.time() - start_time) + self.buffer_time
+		if (time_spent >= self.max_time) or (self.player_turn == 'X' and depth >= self.d1) or (self.player_turn == 'O' and depth >= self.d2) or self.is_end():
 			score = self.heuristic_e1() if simple_heuristic else self.heuristic_e2()
 			return (score, x, y)
 
@@ -282,14 +285,14 @@ class Game:
 				if self.current_state[i][j] == '.':
 					if max:
 						self.current_state[i][j] = 'O'
-						(v, _, _) = self.alphabeta(depth = depth + 1, max=False, simple_heuristic=False)
+						(v, _, _) = self.alphabeta(start_time, depth = depth + 1, max=False, simple_heuristic=False)
 						if v > value:
 							value = v
 							x = i
 							y = j
 					else:
 						self.current_state[i][j] = 'X'
-						(v, _, _) = self.alphabeta(depth = depth + 1, max=True, simple_heuristic=True)
+						(v, _, _) = self.alphabeta(start_time, depth = depth + 1, max=True, simple_heuristic=True)
 						if v < value:
 							value = v
 							x = i
@@ -324,14 +327,14 @@ class Game:
 			start = time.time()
 			if algo == self.MINIMAX:
 				if self.player_turn == 'X':
-					(_, x, y) = self.minimax(max=False)
+					(_, x, y) = self.minimax(start_time=start, max=False)
 				else:
-					(_, x, y) = self.minimax(max=True)
+					(_, x, y) = self.minimax(start_time=start, max=True)
 			else: # algo == self.ALPHABETA
 				if self.player_turn == 'X':
-					(m, x, y) = self.alphabeta(max=False)
+					(m, x, y) = self.alphabeta(start_time=start, max=False)
 				else:
-					(m, x, y) = self.alphabeta(max=True)
+					(m, x, y) = self.alphabeta(start_time=start, max=True)
 			end = time.time()
 			if (self.player_turn == 'X' and player_x == self.HUMAN) or (self.player_turn == 'O' and player_o == self.HUMAN):
 					if self.recommend:
