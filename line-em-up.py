@@ -260,7 +260,7 @@ class Game:
 
 
 
-	def alphabeta(self, start_time, depth=0, alpha=float('-inf'), beta=float('inf'), max=False, simple_heuristic=True):
+	def alphabeta(self, start_time, alpha=float('-inf'), beta=float('inf'), depth=0, max=False, simple_heuristic=True):
 		# Minimizing for 'X' and maximizing for 'O'
 		# Possible values are:
 		# -1 - win for 'X'
@@ -285,14 +285,14 @@ class Game:
 				if self.current_state[i][j] == '.':
 					if max:
 						self.current_state[i][j] = 'O'
-						(v, _, _) = self.alphabeta(start_time, depth = depth + 1, max=False, simple_heuristic=False)
+						(v, _, _) = self.alphabeta(start_time, alpha, beta, depth = depth + 1, max=False, simple_heuristic=False)
 						if v > value:
 							value = v
 							x = i
 							y = j
 					else:
 						self.current_state[i][j] = 'X'
-						(v, _, _) = self.alphabeta(start_time, depth = depth + 1, max=True, simple_heuristic=True)
+						(v, _, _) = self.alphabeta(start_time, alpha, beta, depth = depth + 1, max=True, simple_heuristic=True)
 						if v < value:
 							value = v
 							x = i
