@@ -28,4 +28,3 @@ def get_secondary_diagonals(current_state):
         current_diagonal.append(current_state[j][i])
     all_diagonals.append(current_diagonal)
   return all_diagonals
-  

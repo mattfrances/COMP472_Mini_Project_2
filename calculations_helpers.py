@@ -10,18 +10,16 @@ def format_heuristic_evaluations_by_depth(depth_data):
 
 def calculate_average_depth_of_heuristic_evaluation_tree(depth_data):
   running_sum = 0
+  running_product = 0
   for i in range(len(depth_data)):
-    running_sum += i*depth_data[i]
-  average = running_sum/len(depth_data)
-  return average
+    running_sum+=depth_data[i]
+    running_product += i*depth_data[i]
+  average_depth = running_product/running_sum
+  return average_depth
 
 # TO DO
 def calculate_average_recursion_depth_at_current_state(depth_data):
-  running_sum = 0
-  for i in range(len(depth_data)):
-    running_sum += i*depth_data[i]
-  average = running_sum/len(depth_data)
-  return average
+  return
 
 def calculate_average_evaluation_time(time_data):
   running_sum = 0
