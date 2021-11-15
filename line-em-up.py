@@ -1,4 +1,6 @@
 import time
+from get_directions import *
+from calculations_helpers import *
 
 class Game:
 	MINIMAX = 0
@@ -22,6 +24,15 @@ class Game:
 		self.d2 = d2
 		self.max_time = max_time
 		self.buffer_time = 0.005
+		self.num_of_heuristic_evaluations_for_current_turn = 0
+		self.total_num_of_heuristic_evaluations = 0
+		self.evaluation_times = []
+		self.total_num_of_heuristic_evaluations
+		self.current_depth=0
+		self.num_of_heuristic_evaluations_at_current_depth = 0
+		self.heuristic_evaluations_by_depth_for_current_turn = []
+		self.heuristic_data_for_all_moves = []
+		self.total_moves=0
 
 	def initialize_game(self,n,b):
 		tempMatrix = []
@@ -81,58 +92,27 @@ class Game:
 		else:
 			return None
 
-	def get_verticals(self):
-		all_verticals = []
-		for i in range(len(self.current_state)):
-			all_verticals.append([row[i] for row in self.current_state])
-		return all_verticals
-
-	def get_horizontals(self):
-		return [row for row in self.current_state]
-
-	def get_diagonals(self):
-		all_diagonals = []
-		for k in range(len(self.current_state)*2 - 1):
-			current_diagonal = []
-			for j in range(k+1):
-				i = k-j
-				if i < len(self.current_state) and j < len(self.current_state):
-					current_diagonal.append(self.current_state[i][j])
-			all_diagonals.append(current_diagonal)
-		return all_diagonals
-
-	def get_secondary_diagonals(self):
-		all_diagonals = []
-		for k in range(len(self.current_state)*2 - 1):
-			current_diagonal = []
-			for j in range(k+1):
-				i = k-j
-				if i < len(self.current_state) and j < len(self.current_state):
-					current_diagonal.append(self.current_state[j][i])
-			all_diagonals.append(current_diagonal)
-		return all_diagonals
-
 	def is_end(self):
 		# Vertical win
-		verticals = self.get_verticals()
+		verticals = get_verticals(self.current_state)
 		for arr in verticals:
 			winner = self.has_s_consecutive_values(arr)
 			if winner:
 				return winner
 		# Horizontal win
-		horizontals = self.get_horizontals()
+		horizontals = get_horizontals(self.current_state)
 		for arr in horizontals:
 			winner = self.has_s_consecutive_values(arr)
 			if winner:
 				return winner
 		# Diagonals win
-		diagonals = self.get_diagonals()
+		diagonals = get_diagonals(self.current_state)
 		for arr in diagonals:
 			winner = self.has_s_consecutive_values(arr)
 			if winner:
 				return winner
 		# Second diagonals win
-		second_diagonals = self.get_secondary_diagonals()
+		second_diagonals = get_secondary_diagonals(self.current_state)
 		for arr in second_diagonals:
 			winner = self.has_s_consecutive_values(arr)
 			if winner:
@@ -155,6 +135,10 @@ class Game:
 				print('The winner is O!')
 			elif self.result == '.':
 				print("It's a tie!")
+			print(F'6(b)i   Average evaluation time: {calculate_average_evaluation_time(self.evaluation_times)}')
+			print(F'6(b)ii  Total heuristic evaluations: {self.total_num_of_heuristic_evaluations}')
+			print(F'6(b)iii Evaluations by depth: {format_heuristic_evaluations_by_depth(calculate_evaluations_by_depth(self.heuristic_data_for_all_moves))}')
+			print(F'6(b)vi  Total moves: {self.total_moves}')
 			self.initialize_game(self.n, self.b)
 		return self.result
 
@@ -169,6 +153,13 @@ class Game:
 				print('The move is not valid! Try again.')
 
 	def switch_player(self):
+		self.total_moves+=1
+		self.heuristic_data_for_all_moves.append(self.heuristic_evaluations_by_depth_for_current_turn)
+		self.total_num_of_heuristic_evaluations += self.num_of_heuristic_evaluations_for_current_turn
+		self.current_depth=0
+		self.num_of_heuristic_evaluations_at_current_depth = 0
+		self.heuristic_evaluations_by_depth_for_current_turn = []
+		self.num_of_heuristic_evaluations_for_current_turn = 0
 		if self.player_turn == 'X':
 			self.player_turn = 'O'
 		elif self.player_turn == 'O':
@@ -176,10 +167,11 @@ class Game:
 		return self.player_turn
 
 	def heuristic_e1(self):
-		vertical = self.get_verticals()
-		horizontal = self.get_horizontals()
-		diagonal = self.get_diagonals()
-		secondary_diagonal = self.get_secondary_diagonals()
+		self.num_of_heuristic_evaluations_for_current_turn+=1
+		vertical = get_verticals(self.current_state)
+		horizontal = get_horizontals(self.current_state)
+		diagonal = get_diagonals(self.current_state)
+		secondary_diagonal = get_secondary_diagonals(self.current_state)
 		all_rows = [*vertical, *horizontal, *diagonal, *secondary_diagonal]
 		score = 0
 		for row in all_rows:
@@ -190,10 +182,11 @@ class Game:
 		return score
 
 	def heuristic_e2(self):
-		vertical = self.get_verticals()
-		horizontal = self.get_horizontals()
-		diagonal = self.get_diagonals()
-		secondary_diagonal = self.get_secondary_diagonals()
+		self.num_of_heuristic_evaluations_for_current_turn+=1
+		vertical = get_verticals(self.current_state)
+		horizontal = get_horizontals(self.current_state)
+		diagonal = get_diagonals(self.current_state)
+		secondary_diagonal = get_secondary_diagonals(self.current_state)
 		all_rows = [*vertical, *horizontal, *diagonal, *secondary_diagonal]
 		goal_rows_X=0
 		goal_rows_Y=0
@@ -217,7 +210,7 @@ class Game:
 		score = goal_rows_X-goal_rows_Y
 		return score
 
-	def minimax(self, start_time, depth=0, max=False, simple_heuristic=True):
+	def minimax(self, start_time, depth=0, max=False, simple_heuristic=False):
 		# Minimizing for 'X' and maximizing for 'O'
 		# Possible values are:
 		# -1 - win for 'X'
@@ -232,9 +225,21 @@ class Game:
 		y = None
 
 		# If max depth or time is reached, or we've reached a terminal node
-		# 	then run the heuristic and return the score	
+		# 	then run the heuristic and return the score
+		if(self.current_depth!=depth):
+			self.num_of_heuristic_evaluations_at_current_depth = 0
+		self.current_depth = depth
+
+		# Initializing array containing all information related to heuristic evaluations for a single turn.
+		if(self.current_depth == len(self.heuristic_evaluations_by_depth_for_current_turn)): 
+			self.heuristic_evaluations_by_depth_for_current_turn.append(self.num_of_heuristic_evaluations_at_current_depth)
+		else:
+			self.heuristic_evaluations_by_depth_for_current_turn[self.current_depth] = self.num_of_heuristic_evaluations_at_current_depth
+
 		time_spent = (time.time() - start_time) + self.buffer_time
 		if (time_spent >= self.max_time) or (self.player_turn == 'X' and depth >= self.d1) or (self.player_turn == 'O' and depth >= self.d2) or self.is_end():
+			self.num_of_heuristic_evaluations_at_current_depth += 1
+			self.heuristic_evaluations_by_depth_for_current_turn[self.current_depth] = self.num_of_heuristic_evaluations_at_current_depth
 			score = self.heuristic_e1() if simple_heuristic else self.heuristic_e2()
 			return (score, x, y)
 
@@ -274,9 +279,21 @@ class Game:
 		y = None
 
 		# If max depth or time is reached, or we've reached a terminal node
-		# 	then run the heuristic and return the score	
+		# 	then run the heuristic and return the score
+		if(self.current_depth!=depth):
+			self.num_of_heuristic_evaluations_at_current_depth = 0
+		self.current_depth = depth
+
+		# Initializing array containing all information related to heuristic evaluations for a single turn.
+		if(self.current_depth == len(self.heuristic_evaluations_by_depth_for_current_turn)): 
+			self.heuristic_evaluations_by_depth_for_current_turn.append(self.num_of_heuristic_evaluations_at_current_depth)
+		else:
+			self.heuristic_evaluations_by_depth_for_current_turn[self.current_depth] = self.num_of_heuristic_evaluations_at_current_depth
+
 		time_spent = (time.time() - start_time) + self.buffer_time
 		if (time_spent >= self.max_time) or (self.player_turn == 'X' and depth >= self.d1) or (self.player_turn == 'O' and depth >= self.d2) or self.is_end():
+			self.num_of_heuristic_evaluations_at_current_depth += 1
+			self.heuristic_evaluations_by_depth_for_current_turn[self.current_depth] = self.num_of_heuristic_evaluations_at_current_depth
 			score = self.heuristic_e1() if simple_heuristic else self.heuristic_e2()
 			return (score, x, y)
 
@@ -336,13 +353,22 @@ class Game:
 				else:
 					(m, x, y) = self.alphabeta(start_time=start, max=True)
 			end = time.time()
+			evaluation_time = round(end - start, 7)
+			self.evaluation_times.append(evaluation_time)
 			if (self.player_turn == 'X' and player_x == self.HUMAN) or (self.player_turn == 'O' and player_o == self.HUMAN):
 					if self.recommend:
-						print(F'Evaluation time: {round(end - start, 7)}s')
+						print(F'i   Evaluation time: {evaluation_time}s')
+						print(F'ii  Heuristic evaluations: {self.num_of_heuristic_evaluations_for_current_turn}')
+						print(F'ii  Heuristic evaluations: {self.heuristic_evaluations}')
+						print(F'iii Evaluations by depth: {display_heuristic_evaluations_by_depth_for_current_turn(self.heuristic_evaluations_by_depth_for_current_turn)}')
+						print(F'iv Average evaluation depth: {calculate_average_depth_of_heuristic_evaluation_tree(self.heuristic_evaluations_by_depth_for_current_turn)}')
 						print(F'Recommended move: x = {x}, y = {y}')
 					(x,y) = self.input_move()
 			if (self.player_turn == 'X' and player_x == self.AI) or (self.player_turn == 'O' and player_o == self.AI):
-				print(F'Evaluation time: {round(end - start, 7)}s')
+				print(F'i   Evaluation time: {round(end - start, 7)}s')
+				print(F'ii  Heuristic evaluations: {self.total_num_of_heuristic_evaluations}')
+				print(F'iii Evaluations by depth: {format_heuristic_evaluations_by_depth(self.heuristic_evaluations_by_depth_for_current_turn)}')
+				print(F'iv Average evaluation depth: {calculate_average_depth_of_heuristic_evaluation_tree(self.heuristic_evaluations_by_depth_for_current_turn)}')
 				print(F'Player {self.player_turn} under AI control plays: x = {x}, y = {y}')
 			self.current_state[x][y] = self.player_turn
 			self.switch_player()
