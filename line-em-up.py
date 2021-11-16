@@ -19,6 +19,7 @@ tot_heur_evals = 0
 evals_depth = 0
 tot_moves = 0
 avg_evals_depth = 0
+sb_avg_recursive  = 0
 
 
 class Game:
@@ -443,11 +444,6 @@ class Game:
 			print(F'Player 2: {player_name_O} d={self.d2} a={type_of_search} {type_of_heuristic_player_y}')
 			f.write(F'Player 2: {player_name_O} d={self.d2} a={type_of_search} {type_of_heuristic_player_y}\n')
 
-		# with open('scoreboard.txt', 'a') as fl:
-		# 	fl.write(F'n={self.n} b={len(self.b)} s={self.s} t={self.max_time}\n')
-		# 	f.write(F'Player 1: {player_name_x} d={self.d1} a={type_of_search}
-		# 	f.write(F'Player 2: {player_name_O} d={self.d2} a={type_of_search}
-
 		while True:
 			self.draw_board()
 			if self.check_end():
@@ -467,6 +463,10 @@ class Game:
 			evaluation_time = round(end - start, 7)
 			self.evaluation_times.append(evaluation_time)
 			self.avg_recusive_depths.append(avg_recursive_depth)
+
+			global sb_avg_recursive 
+			sb_avg_recursive += sum(self.avg_recusive_depths)/len(self.avg_recusive_depths)
+
 			if (self.player_turn == 'X' and player_x == self.HUMAN) or (self.player_turn == 'O' and player_o == self.HUMAN):
 					if self.recommend:
 
@@ -556,6 +556,7 @@ def main():
 		fl.write(F'ii  Total heuristic evaluations: {tot_heur_evals/(2*r_games)} \n')
 		#fl.write(F'iii Evaluations by depth: {evals_depth/(2*r_games)} \n')
 		fl.write(F'iv  Average evaluation depth: {avg_evals_depth/(2*r_games)} \n')
+		fl.write(F'v   Average recursion depth: {sb_avg_recursive/(2*r_games)} \n')
 		fl.write(F'vi  Average moves per game: {tot_moves/(2*r_games)} \n')
 		
 	
