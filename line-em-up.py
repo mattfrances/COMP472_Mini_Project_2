@@ -35,6 +35,7 @@ class Game:
 		self.total_moves=0
 		self.player_x_heuristic = True
 		self.player_y_heuristic = False
+		self.avg_recusive_depths = []
 
 	def initialize_game(self,n,b):
 		tempMatrix = []
@@ -51,7 +52,7 @@ class Game:
 		self.player_turn = 'X'
 
 	def draw_board(self):
-		with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+		with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 			print(F'\n(move #{self.total_moves})')
 			f.write(F'\n(move #{self.total_moves})\n')
 
@@ -60,13 +61,13 @@ class Game:
 
 			for y in range(0, len(self.current_state)):
 				for x in range(0, len(self.current_state)):
-					with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+					with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 						print(F'{self.current_state[x][y]}', end="")
 						f.write(F'{self.current_state[x][y]}')
-				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 					print()
 					f.write('\n')
-			with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+			with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 				print()
 				f.write('\n')
 		
@@ -78,7 +79,6 @@ class Game:
 		else:
 			return True
 
-	# TODO (maybe) - improve algorithm to calculate longest sequence in a given array
 	def has_s_consecutive_values(self, arr):
 		largest_count = 0
 		largest_count_char = ''
@@ -144,18 +144,18 @@ class Game:
 		# Printing the appropriate message if the game has ended
 		if self.result != None:
 			if self.result == 'X':
-				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 					print('The winner is X!')
 					f.write('The winner is X!\n')
 			elif self.result == 'O':
-				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 					print('The winner is O!')
 					f.write('The winner is O!\n')
 			elif self.result == '.':
-				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 					print("It's a tie!")
-					f.write("It's a tie!")
-			with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+					f.write("It's a tie!\n")
+			with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 				print(F'6(b)i   Average evaluation time: {calculate_average_evaluation_time(self.evaluation_times)}')
 				f.write(F'6(b)i   Average evaluation time: {calculate_average_evaluation_time(self.evaluation_times)}\n')
 
@@ -164,6 +164,9 @@ class Game:
 
 				print(F'6(b)iv Evaluations by depth: {format_heuristic_evaluations_by_depth(calculate_evaluations_by_depth(self.heuristic_data_for_all_moves))}')
 				f.write(F'6(b)iv Evaluations by depth: {format_heuristic_evaluations_by_depth(calculate_evaluations_by_depth(self.heuristic_data_for_all_moves))}\n')
+
+				print(F'6(b)v Average of the per-move average recursion depth: {sum(self.avg_recusive_depths) / len(self.avg_recusive_depths)}')
+				f.write(F'6(b)v Average of the per-move average recursion depth: {sum(self.avg_recusive_depths) / len(self.avg_recusive_depths)}\n')
 
 				print(F'6(b)vi  Total moves: {self.total_moves}')
 				f.write(F'6(b)vi  Total moves: {self.total_moves}\n')
@@ -269,27 +272,32 @@ class Game:
 			self.num_of_heuristic_evaluations_at_current_depth += 1
 			self.heuristic_evaluations_by_depth_for_current_turn[self.current_depth] = self.num_of_heuristic_evaluations_at_current_depth
 			score = self.heuristic_e1() if simple_heuristic else self.heuristic_e2()
-			return (score, x, y)
+			return (score, x, y, depth)
 
+		children_depths = []
 		for i in range(0, len(self.current_state)):
 			for j in range(0, len(self.current_state)):
 				if self.current_state[i][j] == '.':
 					if max:
 						self.current_state[i][j] = 'O'
-						(v, _, _) = self.minimax(start_time, depth = depth + 1, max=False, simple_heuristic=self.player_y_heuristic)
+						(v, _, _, avg_depth) = self.minimax(start_time, depth = depth + 1, max=False, simple_heuristic=self.player_y_heuristic)
+						children_depths.append(avg_depth)
 						if v > value:
 							value = v
 							x = i
 							y = j
 					else:
 						self.current_state[i][j] = 'X'
-						(v, _, _) = self.minimax(start_time, depth = depth + 1, max=True, simple_heuristic=self.player_x_heuristic)
+						(v, _, _, avg_depth) = self.minimax(start_time, depth = depth + 1, max=True, simple_heuristic=self.player_x_heuristic)
+						children_depths.append(avg_depth)
 						if v < value:
 							value = v
 							x = i
 							y = j
 					self.current_state[i][j] = '.'
-		return (value, x, y)
+
+		avg_children_depth = sum(children_depths) / len(children_depths)
+		return (value, x, y, avg_children_depth)
 
 
 
@@ -323,21 +331,24 @@ class Game:
 			self.num_of_heuristic_evaluations_at_current_depth += 1
 			self.heuristic_evaluations_by_depth_for_current_turn[self.current_depth] = self.num_of_heuristic_evaluations_at_current_depth
 			score = self.heuristic_e1() if simple_heuristic else self.heuristic_e2()
-			return (score, x, y)
+			return (score, x, y, depth)
 
+		children_depths = []
 		for i in range(0, len(self.current_state)):
 			for j in range(0, len(self.current_state)):
 				if self.current_state[i][j] == '.':
 					if max:
 						self.current_state[i][j] = 'O'
-						(v, _, _) = self.alphabeta(start_time, alpha, beta, depth = depth + 1, max=False, simple_heuristic=False)
+						(v, _, _, avg_depth) = self.alphabeta(start_time, alpha, beta, depth = depth + 1, max=False, simple_heuristic=False)
+						children_depths.append(avg_depth)
 						if v > value:
 							value = v
 							x = i
 							y = j
 					else:
 						self.current_state[i][j] = 'X'
-						(v, _, _) = self.alphabeta(start_time, alpha, beta, depth = depth + 1, max=True, simple_heuristic=True)
+						(v, _, _, avg_depth) = self.alphabeta(start_time, alpha, beta, depth = depth + 1, max=True, simple_heuristic=True)
+						children_depths.append(avg_depth)
 						if v < value:
 							value = v
 							x = i
@@ -346,15 +357,16 @@ class Game:
 
 					if max: 
 						if value >= beta:
-							return (value, x, y)
+							return (value, x, y, avg_depth)
 						if value > alpha:
 							alpha = value
 					else:
 						if value <= alpha:
-							return (value, x, y)
+							return (value, x, y, avg_depth)
 						if value < beta:
 							beta = value
-		return (value, x, y)
+		avg_children_depth = sum(children_depths) / len(children_depths)
+		return (value, x, y, avg_children_depth)
 
 	def play(self,algo=None,player_x=None,player_o=None):	
 		if algo == None:
@@ -370,7 +382,7 @@ class Game:
 		type_of_heuristic_player_x = 'e1(regular)' if self.player_x_heuristic==True else 'e2(defensive)'
 		type_of_heuristic_player_y = 'e1(regular)' if self.player_y_heuristic==True else 'e2(defensive)'
 
-		with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+		with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 			print(F'\nn={self.n} b={len(self.b)} s={self.s} t={self.max_time}')
 			f.write(F'\nn={self.n} b={len(self.b)} s={self.s} t={self.max_time}\n')
 
@@ -390,20 +402,21 @@ class Game:
 			start = time.time()
 			if algo == self.MINIMAX:
 				if self.player_turn == 'X':
-					(_, x, y) = self.minimax(start_time=start, max=False)
+					(_, x, y, avg_recursive_depth) = self.minimax(start_time=start, max=False)
 				else:
-					(_, x, y) = self.minimax(start_time=start, max=True)
+					(_, x, y, avg_recursive_depth) = self.minimax(start_time=start, max=True)
 			else: # algo == self.ALPHABETA
 				if self.player_turn == 'X':
-					(m, x, y) = self.alphabeta(start_time=start, max=False)
+					(m, x, y, avg_recursive_depth) = self.alphabeta(start_time=start, max=False)
 				else:
-					(m, x, y) = self.alphabeta(start_time=start, max=True)
+					(m, x, y, avg_recursive_depth) = self.alphabeta(start_time=start, max=True)
 			end = time.time()
 			evaluation_time = round(end - start, 7)
 			self.evaluation_times.append(evaluation_time)
+			self.avg_recusive_depths.append(avg_recursive_depth)
 			if (self.player_turn == 'X' and player_x == self.HUMAN) or (self.player_turn == 'O' and player_o == self.HUMAN):
 					if self.recommend:
-						with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+						with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 							print(F'Recommended move: x = {x}, y = {y}')
 							f.write(F'Recommended move: x = {x}, y = {y}\n')
 
@@ -418,9 +431,12 @@ class Game:
 
 							print(F'iv Average evaluation depth: {calculate_average_depth_of_heuristic_evaluation_tree(self.heuristic_evaluations_by_depth_for_current_turn)}')
 							f.write(F'iv Average evaluation depth: {calculate_average_depth_of_heuristic_evaluation_tree(self.heuristic_evaluations_by_depth_for_current_turn)}\n')
+
+							print(F'v Average recursion depth: {avg_recursive_depth}')
+							f.write(F'v Average recursion depth: {avg_recursive_depth}\n')
 					(x,y) = self.input_move()
 			if (self.player_turn == 'X' and player_x == self.AI) or (self.player_turn == 'O' and player_o == self.AI):
-				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 					print(F'Player {self.player_turn} under AI control plays: x = {x}, y = {y}')
 					f.write(F'Player {self.player_turn} under AI control plays: x = {x}, y = {y}\n')
 
@@ -435,7 +451,10 @@ class Game:
 
 					print(F'iv Average evaluation depth: {calculate_average_depth_of_heuristic_evaluation_tree(self.heuristic_evaluations_by_depth_for_current_turn)}')
 					f.write(F'iv Average evaluation depth: {calculate_average_depth_of_heuristic_evaluation_tree(self.heuristic_evaluations_by_depth_for_current_turn)}\n')
-				
+
+					print(F'v Average recursion depth: {avg_recursive_depth}')
+					f.write(F'v Average recursion depth: {avg_recursive_depth}\n')
+
 			self.current_state[x][y] = self.player_turn
 			self.switch_player()
 
