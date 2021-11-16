@@ -103,7 +103,6 @@ def main():
   with open("scoreboard.txt", "wb") as outputFile:
     for f in txt_files:
         with open(f, "rb") as inputFile:
-            outputFile.write(F'FILE NAME: {f}\n\n')
             outputFile.write(inputFile.read())
             outputFile.write('\n\n\n\n\n\n\n\n\n')
 

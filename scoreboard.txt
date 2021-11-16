@@ -1,0 +1,20 @@
+n=4 b=4 s=3 t=1
+Player 1: AI d=6 a=False
+Player 2: AI d=6 a=False
+
+10 games
+
+Total wins for heuristic e1: 0 (0.0%) (regular)
+Total wins for heuristic e2: 0 (0.0%) (defensive) 
+i   Average evaluation time: 0.5593783633333335 
+ii  Total heuristic evaluations: 1164790.0 
+iv  Average evaluation depth: 0.0 
+v   Average recursion depth: 125.88569383766296 
+vi  Average moves per game: 24.0 
+
+
+
+
+
+
+
