@@ -1,6 +1,25 @@
 import time
+import os.path
 from get_directions import *
 from calculations_helpers import *
+
+count_wins_e1 = 0
+count_wins_e2 = 0
+sb_eval_time = 0
+sb_total_heuristic_evals = 0
+
+sb_player_name_x = ''
+sb_player_name_O = ''
+sb_type_of_search = ''
+sb_type_of_heuristic_player_x = ''
+sb_type_of_heuristic_player_y = ''
+
+avg_eval_time = 0
+tot_heur_evals = 0
+evals_depth = 0
+tot_moves = 0
+avg_evals_depth = 0
+
 
 class Game:
 	MINIMAX = 0
@@ -144,18 +163,36 @@ class Game:
 		# Printing the appropriate message if the game has ended
 		if self.result != None:
 			if self.result == 'X':
-				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
+
+				global count_wins_e1
+				count_wins_e1 += 1
+				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
 					print('The winner is X!')
 					f.write('The winner is X!\n')
 			elif self.result == 'O':
-				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
+				global count_wins_e2
+				count_wins_e2 += 1
+				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
 					print('The winner is O!')
 					f.write('The winner is O!\n')
 			elif self.result == '.':
 				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 					print("It's a tie!")
-					f.write("It's a tie!\n")
-			with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
+					f.write("It's a tie!")
+
+			global tot_moves
+			tot_moves += self.total_moves
+
+			global avg_eval_time
+			avg_eval_time += calculate_average_evaluation_time(self.evaluation_times)
+
+			global tot_heur_evals
+			tot_heur_evals += self.total_num_of_heuristic_evaluations
+
+			global evals_depth 
+			evals_depth  = calculate_evaluations_by_depth(self.heuristic_data_for_all_moves)
+
+			with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
 				print(F'6(b)i   Average evaluation time: {calculate_average_evaluation_time(self.evaluation_times)}')
 				f.write(F'6(b)i   Average evaluation time: {calculate_average_evaluation_time(self.evaluation_times)}\n')
 
@@ -382,7 +419,18 @@ class Game:
 		type_of_heuristic_player_x = 'e1(regular)' if self.player_x_heuristic==True else 'e2(defensive)'
 		type_of_heuristic_player_y = 'e1(regular)' if self.player_y_heuristic==True else 'e2(defensive)'
 
-		with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
+		global sb_player_name_x
+		global sb_player_name_O
+		global sb_type_of_search
+		global sb_type_of_heuristic_player_x
+		global sb_type_of_heuristic_player_y
+		sb_player_name_x = 'Human' if player_x == self.HUMAN else 'AI'
+		sb_player_name_O = 'Human' if player_o == self.HUMAN else 'AI'
+		sb_type_of_search = 'True' if algo==self.alphabeta else 'False'
+		sb_type_of_heuristic_player_x = '(regular)' if self.player_x_heuristic==True else '(defensive)'
+		sb_type_of_heuristic_player_y = '(regular)' if self.player_y_heuristic==True else '(defensive)'
+
+		with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
 			print(F'\nn={self.n} b={len(self.b)} s={self.s} t={self.max_time}')
 			f.write(F'\nn={self.n} b={len(self.b)} s={self.s} t={self.max_time}\n')
 
@@ -394,6 +442,11 @@ class Game:
 
 			print(F'Player 2: {player_name_O} d={self.d2} a={type_of_search} {type_of_heuristic_player_y}')
 			f.write(F'Player 2: {player_name_O} d={self.d2} a={type_of_search} {type_of_heuristic_player_y}\n')
+
+		# with open('scoreboard.txt', 'a') as fl:
+		# 	fl.write(F'n={self.n} b={len(self.b)} s={self.s} t={self.max_time}\n')
+		# 	f.write(F'Player 1: {player_name_x} d={self.d1} a={type_of_search}
+		# 	f.write(F'Player 2: {player_name_O} d={self.d2} a={type_of_search}
 
 		while True:
 			self.draw_board()
@@ -416,7 +469,8 @@ class Game:
 			self.avg_recusive_depths.append(avg_recursive_depth)
 			if (self.player_turn == 'X' and player_x == self.HUMAN) or (self.player_turn == 'O' and player_o == self.HUMAN):
 					if self.recommend:
-						with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
+
+						with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
 							print(F'Recommended move: x = {x}, y = {y}')
 							f.write(F'Recommended move: x = {x}, y = {y}\n')
 
@@ -474,6 +528,7 @@ def create_blocks(board_size):
 
 	return blocks
 
+r_games = 2
 def main():
 	n = int(input('Enter size of board: '))
 	blocks = create_blocks(n)
@@ -482,13 +537,34 @@ def main():
 	max_depth_player_2 = int(input('Enter Player 2\'s maximum depth for the adversarial search: '))
 	max_time = int(input('Enter the maximum time (in seconds) permitted for the AI to return a move: '))
 	g = Game(n, blocks, s, max_depth_player_1, max_depth_player_2, max_time, recommend = True)
+
+
+	for i in range(r_games*2):
+		g.play(algo=Game.ALPHABETA,player_x=Game.AI,player_o=Game.AI)
+
+	if os.path.exists('scoreboard.txt'): 
+		open('scoreboard.txt', 'w').close()
+	with open('scoreboard.txt', 'a') as fl:
+		fl.write(F'n={g.n} b={len(g.b)} s={g.s} t={g.max_time}\n')
+		fl.write(F'Player 1: {sb_player_name_x} d={g.d1} a={sb_type_of_search}\n')
+		fl.write(F'Player 2: {sb_player_name_O} d={g.d2} a={sb_type_of_search}\n\n')
+		fl.write(F'{r_games} games\n\n')
+		fl.write(F'Total wins for heuristic e1: {count_wins_e1} ({100*count_wins_e1/(r_games*2)}%) {sb_type_of_heuristic_player_x}\n')
+		fl.write(F'Total wins for heuristic e2: {count_wins_e2} ({100*count_wins_e2/(r_games*2)}%) {sb_type_of_heuristic_player_y} \n')
+		
+		fl.write(F'i   Average evaluation time: {avg_eval_time/(2*r_games)} \n')
+		fl.write(F'ii  Total heuristic evaluations: {tot_heur_evals/(2*r_games)} \n')
+		#fl.write(F'iii Evaluations by depth: {evals_depth/(2*r_games)} \n')
+		fl.write(F'iv  Average evaluation depth: {avg_evals_depth/(2*r_games)} \n')
+		fl.write(F'vi  Average moves per game: {tot_moves/(2*r_games)} \n')
+		
 	
 	# g.play(algo=Game.MINIMAX,player_x=Game.AI,player_o=Game.AI)
 	# g.play(algo=Game.MINIMAX,player_x=Game.AI,player_o=Game.HUMAN)
 	# g.play(algo=Game.MINIMAX,player_x=Game.HUMAN,player_o=Game.AI)
 	# g.play(algo=Game.MINIMAX,player_x=Game.HUMAN,player_o=Game.HUMAN)
 
-	g.play(algo=Game.ALPHABETA,player_x=Game.AI,player_o=Game.AI)
+	# g.play(algo=Game.ALPHABETA,player_x=Game.AI,player_o=Game.AI)
 	# g.play(algo=Game.ALPHABETA,player_x=Game.AI,player_o=Game.HUMAN)
 	# g.play(algo=Game.ALPHABETA,player_x=Game.HUMAN,player_o=Game.AI)
 	# g.play(algo=Game.ALPHABETA,player_x=Game.HUMAN,player_o=Game.HUMAN)
