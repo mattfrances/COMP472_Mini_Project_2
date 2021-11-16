@@ -193,6 +193,9 @@ class Game:
 			global evals_depth 
 			evals_depth  = calculate_evaluations_by_depth(self.heuristic_data_for_all_moves)
 
+			global avg_evals_depth
+			avg_evals_depth += sum(calculate_evaluations_by_depth(self.heuristic_data_for_all_moves))/len(calculate_evaluations_by_depth(self.heuristic_data_for_all_moves))
+
 			with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
 				print(F'6(b)i   Average evaluation time: {calculate_average_evaluation_time(self.evaluation_times)}')
 				f.write(F'6(b)i   Average evaluation time: {calculate_average_evaluation_time(self.evaluation_times)}\n')
