@@ -1,7 +1,83 @@
 import time
+import random
 import os.path
 from get_directions import *
 from calculations_helpers import *
+
+configurations = [
+  {
+    'n': 4,
+    'b': [(0,0),(0,3),(3,0),(3,3)],
+    's': 3,
+    't': 5,
+    'd1': 6,
+    'd2': 6,
+    'algo': 0,
+  },
+  {
+    'n': 4,
+    'b': [(0,0),(0,3),(3,0),(3,3)],
+    's': 3,
+    't': 1,
+    'd1': 6,
+    'd2': 6,
+    'algo': 1,
+  },
+  {
+    'n': 5,
+    'b': 4,
+    's': 4,
+    't': 1,
+    'd1': 6,
+    'd2': 6,
+    'algo': 1,
+  },
+  {
+    'n': 5,
+    'b': 4,
+    's': 4,
+    't': 5,
+    'd1': 6,
+    'd2': 6,
+    'algo': 1,
+  },
+  {
+    'n': 8,
+    'b': 5,
+    's': 5,
+    't': 1,
+    'd1': 6,
+    'd2': 6,
+    'algo': 1,
+  },
+  {
+    'n': 8,
+    'b': 5,
+    's': 5,
+    't': 5,
+    'd1': 6,
+    'd2': 6,
+    'algo': 1,
+  },
+  {
+    'n': 8,
+    'b': 6,
+    's': 5,
+    't': 1,
+    'd1': 6,
+    'd2': 6,
+    'algo': 1,
+  },
+  {
+    'n': 8,
+    'b': 6,
+    's': 5,
+    't': 5,
+    'd1': 6,
+    'd2': 6,
+    'algo': 1,
+  },
+]
 
 count_wins_e1 = 0
 count_wins_e2 = 0
@@ -72,7 +148,7 @@ class Game:
 		self.player_turn = 'X'
 
 	def draw_board(self):
-		with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
+		with open(F'gameTrace-{self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 			print(F'\n(move #{self.total_moves})')
 			f.write(F'\n(move #{self.total_moves})\n')
 
@@ -81,13 +157,13 @@ class Game:
 
 			for y in range(0, len(self.current_state)):
 				for x in range(0, len(self.current_state)):
-					with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
+					with open(F'gameTrace-{self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 						print(F'{self.current_state[x][y]}', end="")
 						f.write(F'{self.current_state[x][y]}')
-				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
+				with open(F'gameTrace-{self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 					print()
 					f.write('\n')
-			with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
+			with open(F'gameTrace-{self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 				print()
 				f.write('\n')
 		
@@ -167,17 +243,17 @@ class Game:
 
 				global count_wins_e1
 				count_wins_e1 += 1
-				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+				with open(F'gameTrace-{self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 					print('The winner is X!')
 					f.write('The winner is X!\n')
 			elif self.result == 'O':
 				global count_wins_e2
 				count_wins_e2 += 1
-				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+				with open(F'gameTrace-{self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 					print('The winner is O!')
 					f.write('The winner is O!\n')
 			elif self.result == '.':
-				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
+				with open(F'gameTrace-{self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 					print("It's a tie!")
 					f.write("It's a tie!")
 
@@ -193,7 +269,7 @@ class Game:
 			global evals_depth 
 			evals_depth  = calculate_evaluations_by_depth(self.heuristic_data_for_all_moves)
 
-			with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+			with open(F'gameTrace-{self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 				print(F'6(b)i   Average evaluation time: {calculate_average_evaluation_time(self.evaluation_times)}')
 				f.write(F'6(b)i   Average evaluation time: {calculate_average_evaluation_time(self.evaluation_times)}\n')
 
@@ -431,7 +507,7 @@ class Game:
 		sb_type_of_heuristic_player_x = '(regular)' if self.player_x_heuristic==True else '(defensive)'
 		sb_type_of_heuristic_player_y = '(regular)' if self.player_y_heuristic==True else '(defensive)'
 
-		with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+		with open(F'gameTrace-{self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 			print(F'\nn={self.n} b={len(self.b)} s={self.s} t={self.max_time}')
 			f.write(F'\nn={self.n} b={len(self.b)} s={self.s} t={self.max_time}\n')
 
@@ -470,7 +546,7 @@ class Game:
 			if (self.player_turn == 'X' and player_x == self.HUMAN) or (self.player_turn == 'O' and player_o == self.HUMAN):
 					if self.recommend:
 
-						with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}', 'a') as f:
+						with open(F'gameTrace-{self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 							print(F'Recommended move: x = {x}, y = {y}')
 							f.write(F'Recommended move: x = {x}, y = {y}\n')
 
@@ -490,7 +566,7 @@ class Game:
 							f.write(F'v Average recursion depth: {avg_recursive_depth}\n')
 					(x,y) = self.input_move()
 			if (self.player_turn == 'X' and player_x == self.AI) or (self.player_turn == 'O' and player_o == self.AI):
-				with open(F'gameTrace={self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
+				with open(F'gameTrace-{self.n}{len(self.b)}{self.s}{self.max_time}.txt', 'a') as f:
 					print(F'Player {self.player_turn} under AI control plays: x = {x}, y = {y}')
 					f.write(F'Player {self.player_turn} under AI control plays: x = {x}, y = {y}\n')
 
@@ -528,22 +604,37 @@ def create_blocks(board_size):
 
 	return blocks
 
-r_games = 2
+def random_blocks_generator(matrix_size, num_of_blocks):
+  blocks = []
+  # Note: for performance reasons, we will always generate the same number of blocks as matrix size
+  i = 0
+  while i < num_of_blocks:
+    x = random.randint(0, matrix_size-1)
+    y = random.randint(0, matrix_size-1)
+    if [x,y] not in blocks:
+      blocks.append([x,y])
+      i+=1
+  return blocks
+
+
+r_games = 5
 def main():
-	n = int(input('Enter size of board: '))
-	blocks = create_blocks(n)
-	s = int(input('Enter the number of consecutive pieces required to win: '))
-	max_depth_player_1 = int(input('Enter Player 1\'s maximum depth for the adversarial search: '))
-	max_depth_player_2 = int(input('Enter Player 2\'s maximum depth for the adversarial search: '))
-	max_time = int(input('Enter the maximum time (in seconds) permitted for the AI to return a move: '))
-	g = Game(n, blocks, s, max_depth_player_1, max_depth_player_2, max_time, recommend = True)
+	# n = int(input('Enter size of board: '))
+	# blocks = create_blocks(n)
+	# s = int(input('Enter the number of consecutive pieces required to win: '))
+	# max_depth_player_1 = int(input('Enter Player 1\'s maximum depth for the adversarial search: '))
+	# max_depth_player_2 = int(input('Enter Player 2\'s maximum depth for the adversarial search: '))
+	# max_time = int(input('Enter the maximum time (in seconds) permitted for the AI to return a move: '))
+	# g = Game(n, blocks, s, max_depth_player_1, max_depth_player_2, max_time, recommend = True)
 
+	# for each game config
+	for item in configurations:
+		# run the game 10 times
+		for i in range(r_games*2):
+			blocks = item['b'] if isinstance(item['b'], list) else random_blocks_generator(item['n'], item['b'])
+			g = Game(item['n'], blocks, item['s'], item['d1'], item['d2'], item['t'], recommend = True)
+			g.play(algo=item['algo'],player_x=Game.AI,player_o=Game.AI)
 
-	for i in range(r_games*2):
-		g.play(algo=Game.ALPHABETA,player_x=Game.AI,player_o=Game.AI)
-
-	if os.path.exists('scoreboard.txt'): 
-		open('scoreboard.txt', 'w').close()
 	with open('scoreboard.txt', 'a') as fl:
 		fl.write(F'n={g.n} b={len(g.b)} s={g.s} t={g.max_time}\n')
 		fl.write(F'Player 1: {sb_player_name_x} d={g.d1} a={sb_type_of_search}\n')
@@ -557,7 +648,7 @@ def main():
 		#fl.write(F'iii Evaluations by depth: {evals_depth/(2*r_games)} \n')
 		fl.write(F'iv  Average evaluation depth: {avg_evals_depth/(2*r_games)} \n')
 		fl.write(F'v   Average recursion depth: {sb_avg_recursive/(2*r_games)} \n')
-		fl.write(F'vi  Average moves per game: {tot_moves/(2*r_games)} \n')
+		fl.write(F'vi  Average moves per game: {tot_moves/(2*r_games)} \n\n\n\n\n\n\n\n')
 		
 	
 	# g.play(algo=Game.MINIMAX,player_x=Game.AI,player_o=Game.AI)
