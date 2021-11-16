@@ -548,7 +548,7 @@ def main():
 		fl.write(F'n={g.n} b={len(g.b)} s={g.s} t={g.max_time}\n')
 		fl.write(F'Player 1: {sb_player_name_x} d={g.d1} a={sb_type_of_search}\n')
 		fl.write(F'Player 2: {sb_player_name_O} d={g.d2} a={sb_type_of_search}\n\n')
-		fl.write(F'{r_games} games\n\n')
+		fl.write(F'{r_games*2} games\n\n')
 		fl.write(F'Total wins for heuristic e1: {count_wins_e1} ({100*count_wins_e1/(r_games*2)}%) {sb_type_of_heuristic_player_x}\n')
 		fl.write(F'Total wins for heuristic e2: {count_wins_e2} ({100*count_wins_e2/(r_games*2)}%) {sb_type_of_heuristic_player_y} \n')
 		
